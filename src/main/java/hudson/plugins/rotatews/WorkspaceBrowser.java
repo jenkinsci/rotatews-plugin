@@ -15,7 +15,7 @@ import hudson.model.Run;
 import jenkins.model.RunAction2;
 
 public class WorkspaceBrowser implements BuildBadgeAction, RunAction2 {
-	Run<?, ?> parent;
+	transient Run<?, ?> parent;
 	
 	FilePath buildWorkspace;
 	
