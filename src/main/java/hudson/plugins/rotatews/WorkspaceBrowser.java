@@ -8,26 +8,26 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
 import hudson.FilePath;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
 import hudson.model.BuildBadgeAction;
 import hudson.model.DirectoryBrowserSupport;
+import hudson.model.Item;
+import hudson.model.Run;
+import jenkins.model.RunAction2;
 
-public class WorkspaceBrowser implements BuildBadgeAction {
-	AbstractBuild<?, ?> parent;
+public class WorkspaceBrowser implements BuildBadgeAction, RunAction2 {
+	Run<?, ?> parent;
 	
 	FilePath buildWorkspace;
 	
-	public WorkspaceBrowser(AbstractBuild<?, ?> parent, FilePath ws) {
-		this.parent = parent;
+	public WorkspaceBrowser(FilePath ws) {
 		this.buildWorkspace = ws;
 	}
 	
-	public AbstractBuild<?, ?> getParent() {
+	public Run<?, ?> getParent() {
 		return parent;
 	}
 	
-	public AbstractBuild<?, ?> getOwner() {
+	public Run<?, ?> getOwner() {
 		return parent;
 	}
 	
@@ -58,7 +58,7 @@ public class WorkspaceBrowser implements BuildBadgeAction {
      * Serves the workspace files.
      */
     public DirectoryBrowserSupport doDynamic( StaplerRequest req, StaplerResponse rsp ) throws IOException, ServletException, InterruptedException {
-        parent.checkPermission(AbstractProject.WORKSPACE);
+        parent.checkPermission(Item.WORKSPACE);
         FilePath ws = buildWorkspace;
         if ((ws == null) || (!ws.exists())) {
             // if there's no workspace, report a nice error message
@@ -67,6 +67,14 @@ public class WorkspaceBrowser implements BuildBadgeAction {
         } else {
             return new DirectoryBrowserSupport(parent, ws, getDisplayName()+" workspace", "folder.gif", true);
         }
+    }
+    @Override
+    public void onAttached(Run<?, ?> r) {
+        parent = r;
+    }
+    @Override
+    public void onLoad(Run<?, ?> r) {
+        parent = r;
     }
 
 }
